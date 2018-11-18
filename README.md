@@ -3,4 +3,5 @@
 ## Setup and Running
 
 	export BOT_TOKEN="the token"
-	npm run dev
+	export REDIS_HOST="redis host"
+	npm start
