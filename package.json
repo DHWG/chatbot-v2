@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/DHWG/chatbot-v2#readme",
   "dependencies": {
-    "telegraf": "^3.25.0"
+    "telegraf": "^3.25.0",
+    "telegraf-session-redis": "^5.0.0"
   }
 }
