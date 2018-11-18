@@ -1,6 +1,7 @@
 const Telegraf = require('telegraf')
+const Extra = require('telegraf/extra')
+const Markup = require('telegraf/markup')
 const RedisSession = require('telegraf-session-redis')
-const commandArgsMiddleware = require('./commandmiddleware')
 
 // splits all arguments to the command by ,
 function argSplitMiddleware(ctx, next) {
@@ -32,14 +33,15 @@ const session = new RedisSession({
 bot.use(session.middleware())
 bot.use(argSplitMiddleware)
 
-bot.start((ctx) => ctx.reply('Welcome!'))
-bot.help((ctx) => ctx.reply('Send me a sticker'))
-bot.on('sticker', (ctx) => ctx.reply('Fuck you!'))
-bot.hears('hi', (ctx) => {
-	  ctx.session.counter = ctx.session.counter || 0
-	  ctx.session.counter++
-	  ctx.reply(`I heard this ${ctx.session.counter} times already!!`)
-})
+bot.help((ctx) => ctx.reply(`I can do the following things:
+
+Shopping list:
+There is one separate shopping list per chat/user.
+/add item1, ..., itemN : Add items to the shopping list
+/list : Show the current shopping list
+/done : Show a menu to mark items from the shopping list as bought
+`
+))
 
 bot.command('add', ctx => {
     // get from session or initialize as empty list
@@ -56,13 +58,43 @@ bot.command('list', ctx => {
     // get from session or initialize as empty list
     let shoppingList = ctx.session.shoppingList || []
 
-    ctx.reply(`Currently in list: ${shoppingList.join(', ')}`)
+    if (shoppingList.length) {
+	ctx.reply(`Currently in list: ${shoppingList.join(', ')}`)
+    } else {
+	ctx.reply('The shopping list is currently empty.')
+    }
 })
 
 bot.command('done', ctx => {
     // get from session or initialize as empty list
     let shoppingList = ctx.session.shoppingList || []
 
+    if (!shoppingList.length) {
+	ctx.reply('The shopping list is currently empty.')
+	return
+    }
+
+    let buttons = shoppingList.map(item => Markup.callbackButton(item, 'shoppinglistdone_' + item))
+    const keyboard = Markup.inlineKeyboard(buttons, {columns: 1}).extra()
+
+    ctx.reply('Currently in shopping list: ', keyboard)
 })
+
+bot.action(/shoppinglistdone_(.*)/, ctx => {
+    let boughtItem = ctx.match[1]
+    // get from session or initialize as empty list
+    let shoppingList = ctx.session.shoppingList || []
+
+    // remove first occurence of the bought item
+    let idx = shoppingList.indexOf(boughtItem)
+
+    if (idx >= 0) {
+	session.shoppingList = shoppingList.splice(idx, 1)
+	ctx.reply(`Thanks for buying ${boughtItem}, ${ctx.from.first_name}.`)
+    } else {
+	ctx.reply(`${boughtItem} is not on the shopping list anymore you fraud!`)
+    }
+})
+
 
 bot.startPolling()
