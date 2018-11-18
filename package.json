@@ -1,0 +1,23 @@
+{
+  "name": "chatbot-v2",
+  "version": "1.0.0",
+  "description": "The new DH chatbot",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DHWG/chatbot-v2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DHWG/chatbot-v2/issues"
+  },
+  "homepage": "https://github.com/DHWG/chatbot-v2#readme",
+  "dependencies": {
+    "telegraf": "^3.25.0"
+  }
+}
